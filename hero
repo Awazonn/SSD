@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AdventureLand - Final Boss Battle</title>
+    <!-- Du trenger ikke gjøre noe med CSS-koden! -->
+    <link rel="stylesheet" href="css-skal-ikke-roeres/index.css" />
+  </head>
+  <body>
+    <div id="container">
+      <!--
+            Life bars 
+            - For å endre på life bar må dere få tak i div etter id, for eksempel "nameless-knight-hp-div".                       
+        -->
+      <div class="life-bar-container knight-container">
+        <img src="images/knight-head.png" />
+        <div class="life-bar" id="nameless-knight-hp-div"></div>
+        <!-- hp (Health Points) til ridderen -->
+      </div>
+
+      <div class="life-bar-container julia-container">
+        <img src="images/julia-head.png" />
+        <div class="life-bar" id="julia-the-archer-hp-div"></div>
+        <!-- hp (Health Points) til Julia -->
+      </div>
+
+      <div class="life-bar-container cat-container">
+        <img src="images/cat-head.png" alt="" />
+        <div class="life-bar" id="the-cat-hp-div"></div>
+        <!-- hp (Health Points) til katten -->
+      </div>
+
+      <div class="life-bar-container big-boss-container">
+        <img src="images/big-boss-head.png" alt="" />
+        <div class="life-bar" id="big-boss-hp-div"></div>
+        <!-- hp (Health Points) til Big boss -->
+      </div>
+
+      <!-- The knight -->
+      <img id="nameless-knight" src="images/knight.png" alt="" />
+
+      <!-- Julia the archer -->
+      <img id="julia-the-archer" src="images/julia-the-archer.png" />
+
+      <!-- The Cat -->
+      <img id="the-cat" src="images/cat.png" alt="" />
+
+      <!-- William the healer -->
+      <img id="william-the-healer" src="images/healer.png" />
+
+      <!-- Jack the lumberjack -->
+      <img id="jack-the-lumberjack" src="images/lumberjack.png" alt="" />
+
+      <!-- The big evil boss -->
+      <img id="big-boss" src="images/big-boss.png" alt="" />
+
+      <!-- Noen ganger dukker et monster opp her -->
+      <img id="appearing-monster" src="images/bat.png" alt="" />
+
+      <img id="appearing-slime" src="images/slime.png" alt="" />
+    </div>
+    <!-- end container-->
+
+    <!-- Her skrives det ut informasjon om hva brukeren gjør og hva som skjer. -->
+    <div id="output-div">
+      <p>Her skal det skrives ut hva som skjer underveis i spillet.</p>
+    </div>
+
+    <script>
+      var monsterImage = document.getElementById("appearing-monster");
+      var slimeImage = document.getElementById("appearing-slime");
+
+      function styleMonster(monsterName) {
+        monsterName.style.visibility = "";
+        monsterName.style.width = "100px";
+        monsterName.style.borderBottom = "3px solid rgba(150, 50, 50, 0.5)";
+        monsterName.style.left = "650px";
+        monsterName.style.bottom = "40px";
+      }
+
+      styleMonster(monsterImage);
+      styleMonster(slimeImage);
+
+      isSlimeOrBatPresent = false;
+      let heroNames = ["nameless-knight", "the-cat", "julia-the-archer"];
+
+      function generateRandomDamage() {
+        return Math.floor(Math.random() * 10);
+      }
+
+      function healHeroes() {
+        let heroesToHeal = [];
+        let numberOfHeroesToHeal = Math.floor(Math.random() * 3) + 1;
+
+        while (heroesToHeal.length < numberOfHeroesToHeal) {
+          let randomHero = heroNames[Math.floor(Math.random() * 3)];
+          if (!heroesToHeal.includes(randomHero)) {
+            heroesToHeal.push(randomHero);
+          }
+        }
+
+        heroesToHeal.forEach((heroName) => {
+          let heroHP = document.getElementById(`${heroName}-hp-div`);
+          let currentWidth = parseFloat(heroHP.style.width) || 100;
+          currentWidth += 20;
+
+          if (currentWidth > 100) {
+            currentWidth = 100;
+          }
+
+          heroHP.style.width = currentWidth + "%";
+
+          displayMessage(
+            `${heroName} blir helbredet og gjenoppretter 20 HP.`,
+            "white",
+            "green"
+          );
+        });
+      }
+
+      function namelessKnightCanAttack(monsterName) {
+        return monsterName === "big-boss";
+      }
+
+      function juliaTheArcherCanAttack(monsterName) {
+        return monsterName === "bat";
+      }
+
+      function theCatCanAttack(monsterName) {
+        return monsterName === "slime";
+      }
+
+      function attackHero(heroName) {
+        var heroHP = document.getElementById(`${heroName}-hp-div`);
+        var damage = generateRandomDamage();
+        var currentWidth = parseFloat(heroHP.style.width) || 100;
+        currentWidth -= damage;
+
+        if (currentWidth < 0) {
+          currentWidth = 0;
+        }
+
+        heroHP.style.width = currentWidth + "%";
+
+        displayMessage(
+          `Hero ${heroName} angriper, og mister ${damage} HP.`,
+          "white",
+          "red"
+        );
+
+        if (currentWidth === 0) {
+          displayMessage(`Hero ${heroName} er beseiret!`, "white", "red");
+        }
+
+        if (isSlimeOrBatPresent && heroName !== "appearing-monster") {
+          displayMessage(
+            "Heltene kan kun angripe Slime eller Bat nå!",
+            "white",
+            "gray"
+          );
+        }
+      }
+
+      function attackMonster(monsterName) {
+        if (isSlimeOrBatPresent) {
+          if (monsterName === "appearing-monster") {
+            var monsterHP = document.getElementById("appearing-monster-hp-div");
+
+            var damage = generateRandomDamage();
+            var currentWidth = parseFloat(monsterHP.style.width) || 100;
+            currentWidth -= damage;
+
+            if (currentWidth < 0) {
+              currentWidth = 0;
+            }
+
+            monsterHP.style.width = currentWidth + "%";
+
+            displayMessage(
+              `Monster er angrepet og mister ${damage} HP.`,
+              "white",
+              "blue"
+            );
+
+            if (currentWidth === 0) {
+              displayMessage("Monster er beseiret!", "white", "red");
+              isSlimeOrBatPresent = false; // Fjern monsteret
+            }
+          } else {
+            displayMessage(
+              `Heltene kan ikke angripe Big Boss mens ${monsterName} er til stede!`,
+              "white",
+              "gray"
+            );
+          }
+        } else {
+          if (
+            monsterName === "big-boss" &&
+            namelessKnightCanAttack(monsterName)
+          ) {
+            var monsterHP = document.getElementById(`${monsterName}-hp-div`);
+
+            var damage = generateRandomDamage();
+            var currentWidth = parseFloat(monsterHP.style.width) || 100;
+            currentWidth -= damage;
+
+            if (currentWidth < 0) {
+              currentWidth = 0;
+            }
+
+            monsterHP.style.width = currentWidth + "%";
+
+            displayMessage(
+              `Nameless Knight angriper ${monsterName}, og ${
+                monsterName === "big-boss" ? "Big Boss" : monsterName
+              } mister ${damage} HP.`,
+              "white",
+              "blue"
+            );
+
+            if (currentWidth === 0) {
+              displayMessage(
+                `Monster ${monsterName} er beseiret!`,
+                "white",
+                "red"
+              );
+            } else {
+              setTimeout(() => {
+                if (Math.random() < 0.25) {
+                  appearMonster();
+                } else {
+                  // Big Boss angriper tilfeldig en av heltene
+                  var randomHero = heroNames[Math.floor(Math.random() * 3)];
+                  attackHero(randomHero);
+                }
+              }, getRandomDelay());
+            }
+          } else if (
+            monsterName === "bat" &&
+            juliaTheArcherCanAttack(monsterName)
+          ) {
+            var monsterHP = document.getElementById(`${monsterName}-hp-div`);
+
+            var damage = generateRandomDamage();
+            var currentWidth = parseFloat(monsterHP.style.width) || 100;
+            currentWidth -= damage;
+
+            if (currentWidth < 0) {
+              currentWidth = 0;
+            }
+
+            monsterHP.style.width = currentWidth + "%";
+
+            displayMessage(
+              `Julia the Archer angriper ${monsterName}, og ${monsterName} mister ${damage} HP.`,
+              "white",
+              "blue"
+            );
+
+            if (currentWidth === 0) {
+              displayMessage(
+                `Monster ${monsterName} er beseiret!`,
+                "white",
+                "red"
+              );
+            } else {
+              setTimeout(() => {
+                if (Math.random() < 0.25) {
+                  appearMonster();
+                } else {
+                  var randomHero = heroNames[Math.floor(Math.random() * 3)];
+                  attackHero(randomHero);
+                }
+              }, getRandomDelay());
+            }
+          } else if (monsterName === "slime" && theCatCanAttack(monsterName)) {
+            var monsterHP = document.getElementById(`${monsterName}-hp-div`);
+
+            var damage = generateRandomDamage();
+            var currentWidth = parseFloat(monsterHP.style.width) || 100;
+            currentWidth -= damage;
+
+            if (currentWidth < 0) {
+              currentWidth = 0;
+            }
+
+            monsterHP.style.width = currentWidth + "%";
+
+            displayMessage(
+              `The Cat angriper ${monsterName}, og ${monsterName} mister ${damage} HP.`,
+              "white",
+              "blue"
+            );
+
+            if (currentWidth === 0) {
+              displayMessage(
+                `Monster ${monsterName} er beseiret!`,
+                "white",
+                "red"
+              );
+            } else {
+              setTimeout(() => {
+                if (Math.random() < 0.25) {
+                  appearMonster();
+                } else {
+                  var randomHero = heroNames[Math.floor(Math.random() * 3)];
+                  attackHero(randomHero);
+                }
+              }, getRandomDelay());
+            }
+          } else {
+            displayMessage("Heltene kan ikke angripe nå!", "white", "gray");
+          }
+        }
+      }
+
+      document.getElementById("nameless-knight").onclick = function () {
+        attackMonster("big-boss");
+      };
+
+      document.getElementById("the-cat").onclick = function () {
+        attackMonster("slime");
+      };
+
+      document.getElementById("julia-the-archer").onclick = function () {
+        attackMonster("bat");
+      };
+
+      document.getElementById("william-the-healer").onclick = function () {
+        healHeroes();
+      };
+
+      function displayMessage(message, textColor, backgroundColor) {
+        const outputDiv = document.getElementById("output-div");
+        outputDiv.innerHTML = message;
+        outputDiv.style.color = textColor;
+        outputDiv.style.backgroundColor = backgroundColor;
+      }
+
+      function getRandomDelay() {
+        return Math.floor(Math.random() * 3000) + 1000;
+      }
+
+      // Legg til funksjoner for å starte kamp og monstrenes opptreden
+      document.getElementById("start-battle").onclick = function () {
+        appearMonster();
+      };
+    </script>
+  </body>
+</html>
